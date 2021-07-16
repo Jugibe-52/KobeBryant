@@ -14,7 +14,7 @@ library(gridExtra)
 library(knitr)
 library(party)
 
-################### Importaci髇 de datos #################################
+################### Importaci贸n de datos #################################
 path <- file.path("C:/Users/PILAR/Documents/R", "Data Sets", "data.csv")
 disparos <- read.delim(path, header = TRUE, sep = ",", stringsAsFactors = TRUE)
 
@@ -117,7 +117,7 @@ disparos_Partition <- createDataPartition(disparos_supervisados$shot_made_flag,p
 disparos_Train <- disparos_supervisados[disparos_Partition,]
 disparos_Test <- disparos_supervisados[-disparos_Partition,]
 
-# ------------------Discretizaci髇 shot_distance-----------------
+# ------------------Discretizaci贸n shot_distance-----------------
 set.seed(33)
 disparos_Partition <- createDataPartition(disparos_Train$shot_made_flag,p=0.85,list=FALSE)
 disparos_Train_0 <- disparos_Train[disparos_Partition,]
@@ -130,7 +130,7 @@ set.seed(33)
 discr <- chiM(disparos_Discret[,c("shot_distance","shot_made_flag")], alpha = 0.0027)
 discr$cutp
 
-# funci髇 que discretiza cada valor
+# funci贸n que discretiza cada valor
 discretizacion <- function(numero,puntos_corte) {
   num_punto_corte <- 0
   num_punto_corte <- length(puntos_corte)
@@ -174,7 +174,7 @@ disparos_Train_0[,"shot_distance"] <- discretizaciones(disparos_Train_0[,"shot_d
 disparos_Test[,"shot_distance"] <- discretizaciones(disparos_Test[,"shot_distance"],discr$cutp[[1]])
 disparos_no_supervisados[,"shot_distance"] <- discretizaciones(disparos_no_supervisados[,"shot_distance"],discr$cutp[[1]])
 
-### La variable distancia pasa a ser num閞ica entera
+### La variable distancia pasa a ser num茅rica entera
 disparos_Train_0[,"shot_distance"] <- as.integer(disparos_Train_0[,"shot_distance"])
 disparos_Test[,"shot_distance"] <- as.integer(disparos_Test[,"shot_distance"])
 disparos_no_supervisados[,"shot_distance"] <- as.integer(disparos_no_supervisados[,"shot_distance"])
@@ -182,6 +182,43 @@ disparos_no_supervisados[,"shot_distance"] <- as.integer(disparos_no_supervisado
 str(disparos_Train_0)
 str(disparos_Test)
 str(disparos_no_supervisados)
+
+
+
+disparos_Train_0[,"shot_id"]
+sum(disparos_Train_0[,"team_name"] != "Los Angeles Lakers")
+
+sum(disparos_Train_0[,"team_id"] != 1610612747)
+
+
+
+
+### Relaciones lineales
+### Imagen utilizada
+ggplot(disparos_Train_0, aes(lon,loc_x)) + geom_point()
+###
+### Imagen utilizada
+ggplot(disparos_Train_0, aes(lat,loc_y)) + geom_point()
+###
+disparos_Train_0[,"game_event_id"]
+
+# Vista de las entradas que tenemos seg煤n action_type
+ggplot(disparos_Train_0%>%filter(combined_shot_type=="Bank Shot"), 
+       aes(action_type, fill = factor(shot_made_flag))) + geom_bar()
+ggplot(disparos_Train_0%>%filter(combined_shot_type=="Dunk"), 
+       aes(action_type, fill = factor(shot_made_flag))) + geom_bar()
+ggplot(disparos_Train_0%>%filter(combined_shot_type=="Hook Shot"), 
+       aes(action_type, fill = factor(shot_made_flag))) + geom_bar()
+ggplot(disparos_Train_0%>%filter(combined_shot_type=="Jump Shot"), 
+       aes(action_type, fill = factor(shot_made_flag))) + geom_bar()
+
+disparos_Train_0[,"game_date"]
+disparos_Train_0[,"season"]
+
+ggplot(disparos_Train_0, aes(loc_x,loc_y,colour = factor(shot_type))) +
+  geom_point()
+
+
 
 disparos_Train_1 <- disparos_Train_0[,c("loc_x","loc_y","period"
                                         ,"minutes_remaining","seconds_remaining"
@@ -216,21 +253,21 @@ disparos_Train_1 %>% count("shot_distance")
 ### Posicion y aciertos en funcion de shot_zone_area
 g1 <- ggplot(disparos_Train_1, aes(loc_x,loc_y,colour = factor(shot_zone_area))) +
   geom_point() +
-  labs(title="Posici髇 seg鷑 Shot Zone Area")
+  labs(title="Posici贸n seg煤n Shot Zone Area")
 g2 <- ggplot(disparos_Train_1, aes(factor(shot_zone_area), fill = shot_made_flag)) + geom_bar(position = "fill") +
-  labs(title="R醫io aciertos seg鷑 Shot Zone Area")
+  labs(title="R谩tio aciertos seg煤n Shot Zone Area")
 grid.arrange(g1, g2, ncol=2)
 
 ### Posicion y aciertos en funcion de shot_zone_basic
 g3 <- ggplot(disparos_Train_1, aes(loc_x,loc_y,colour = factor(shot_zone_basic))) +
   geom_point() +
-  labs(title="Posici髇 seg鷑 Shot Zone Basic")
+  labs(title="Posici贸n seg煤n Shot Zone Basic")
 g4 <- ggplot(disparos_Train_1, aes(factor(shot_zone_basic), fill = shot_made_flag)) + geom_bar(position = "fill") +
-  labs(title="R醫io aciertos seg鷑 Shot Zone Basic")
+  labs(title="R谩tio aciertos seg煤n Shot Zone Basic")
 grid.arrange(g3, g4, ncol=2)
 
 
-# Frecuencia seg鷑 la zona de disparo
+# Frecuencia seg煤n la zona de disparo
 p1 <- ggplot(disparos_Train_1, aes(x=fct_infreq(shot_zone_area))) + 
   geom_bar(aes(fill=shot_zone_area)) +
   labs(y="Frequency") +
@@ -238,7 +275,7 @@ p1 <- ggplot(disparos_Train_1, aes(x=fct_infreq(shot_zone_area))) +
   theme(axis.text.x=element_text(size=7),
         axis.title.x=element_blank(), 
         legend.position="none") + 
-  labs(title="Distribuci髇 seg鷑 Shot Zone Area")
+  labs(title="Distribuci贸n seg煤n Shot Zone Area")
 
 
 p2 <- ggplot(disparos_Train_1, aes(x=fct_infreq(shot_zone_basic))) + 
@@ -248,7 +285,7 @@ p2 <- ggplot(disparos_Train_1, aes(x=fct_infreq(shot_zone_basic))) +
   theme(axis.text.x=element_text(size=6.3),
         axis.title.x=element_blank(), 
         legend.position="none") + 
-  labs(title="Distribuci髇 seg鷑 Shot Zone Basic")
+  labs(title="Distribuci贸n seg煤n Shot Zone Basic")
 
 
 grid.arrange(p1, p2, ncol=2)
@@ -272,7 +309,7 @@ h1 <- disparos_2 %>%
   ggplot(aes(x=reorder(action_type, counts), y=Precision))+ 
   geom_point(aes(colour=Precision), size=3) +
   scale_colour_gradient(low="red", high="blue") +
-  labs(title="Precisi髇 seg鷑 el tipo de lanzamiento - Conjunto Supervisado") +
+  labs(title="Precisi贸n seg煤n el tipo de lanzamiento - Conjunto Supervisado") +
   theme_bw() +
   theme(axis.title.y=element_blank(),
         legend.position="none",
@@ -287,7 +324,7 @@ h2 <- disparos_2 %>%
   ggplot(aes(x=reorder(action_type, counts), y=Precision))+ 
   geom_point(aes(colour=Precision), size=3) +
   scale_colour_gradient(low="red", high="blue") +
-  labs(title="Precisi髇 seg鷑 el tipo de lanzamiento - Conjunto de entrenamiento") +
+  labs(title="Precisi贸n seg煤n el tipo de lanzamiento - Conjunto de entrenamiento") +
   theme_bw() +
   theme(axis.title.y=element_blank(),
         legend.position="none",
@@ -312,7 +349,7 @@ df_1 %>%
   ggplot(aes(x=reorder(a, b), y=b/sum(b)))+ 
   geom_point(aes(colour=b), size=3) +
   scale_colour_gradient(low="red", high="blue") +
-  labs(title="Relaci髇 en la distribuci髇 en la variable action_type entre datos de entrenamiento y no supervisados") +
+  labs(title="Relaci贸n en la distribuci贸n en la variable action_type entre datos de entrenamiento y no supervisados") +
   theme_bw() +
   theme(axis.title.y=element_blank(),
         legend.position="none",
@@ -328,7 +365,7 @@ disparos_Train_2 %>%
   ggplot(aes(x=game_date, y=Accuracy, group=1)) +
   geom_point(aes(colour=Accuracy), size=3) +
   stat_smooth() +
-  labs(title="Evoluci髇 Temporal de la precisi髇", x="Season",
+  labs(title="Evoluci贸n Temporal de la precisi贸n", x="Season",
        subtitle="Todos las partidos") +
   theme_bw() +
   theme(legend.position="none",
@@ -344,8 +381,8 @@ disparos_Train_2 %>%
   geom_point(aes(y=RegularSeason, colour="RegularSeason"), size=3) +
   geom_smooth(aes(y=Playoff, colour="Playoff")) +
   geom_smooth(aes(y=RegularSeason, colour="RegularSeason")) + 
-  labs(title="Evoluci髇 Temporal de la precisi髇", 
-       subtitle="Playoff y temporada regul醨",
+  labs(title="Evoluci贸n Temporal de la precisi贸n", 
+       subtitle="Playoff y temporada regul谩r",
        x="Season", y="Accuracy") +
   theme_bw() +
   theme(legend.title=element_blank(),
@@ -359,7 +396,7 @@ l1 <- disparos_Train_2 %>%
   summarise(Accuracy=mean(shot_made_flag)) %>%
   ggplot(aes(x=minutes_remaining, y=Accuracy)) + 
   geom_bar(aes(fill=Accuracy), stat="identity") +
-  labs(title="Precisi髇 en funci髇 de los minutos restantes", x="Minutos Restantes")  +
+  labs(title="Precisi贸n en funci贸n de los minutos restantes", x="Minutos Restantes")  +
   theme_bw() +
   theme(legend.position="none",
         plot.title=element_text(hjust=0.5)) 
@@ -369,7 +406,7 @@ l2 <- disparos_Train_2 %>%
   summarise(Accuracy=mean(shot_made_flag)) %>%
   ggplot(aes(x=seconds_remaining, y=Accuracy)) + 
   geom_bar(aes(fill=Accuracy), stat="identity") +
-  labs(title="Precisi髇 en funci髇 de los segundos restantes", x="Segundos Restantes")  +
+  labs(title="Precisi贸n en funci贸n de los segundos restantes", x="Segundos Restantes")  +
   theme_bw() +
   theme(legend.position="none",
         plot.title=element_text(hjust=0.5)) 
@@ -382,7 +419,7 @@ disparos_Train_2 %>%
   summarise(Accuracy=mean(shot_made_flag))%>%
   ggplot(aes(x=reorder(opponent, -Accuracy), y=Accuracy)) + 
   geom_bar(aes(fill=Accuracy), stat="identity") +
-  labs(title="Precisi髇 seg鷑 el oponente", x="oponente") +
+  labs(title="Precisi贸n seg煤n el oponente", x="oponente") +
   theme_bw() +
   theme(legend.position="bottom",
         legend.title=element_blank(),
@@ -460,7 +497,7 @@ plot(model_ctree$finalModel,
 ########### Vemos la eficacia del modelo en el conjunto test con las diferentes medidas
 mini_set <- disparos_Test
 
-# Matriz de confusi髇 RIPPER
+# Matriz de confusi贸n RIPPER
 predicciones <- predict(model_ctree, mini_set)
 predicciones <- as.factor(predicciones == "Acierta")
 aciertos <- as.factor(mini_set[["shot_made_flag"]] == "Acierta")
@@ -485,11 +522,11 @@ medidas
 
 
 ########### Eficacia para subconjuntos del modelo ###############
-# Funci髇 para calcular medidas en un sub-conjunto
+# Funci贸n para calcular medidas en un sub-conjunto
 calcularMedidas <- function(datos) {
   mini_conjunto <- datos
   
-  # Matriz de confusi髇 RIPPER
+  # Matriz de confusi贸n RIPPER
   predicciones <- predict(model_ctree, mini_conjunto)
   # predicciones <- as.factor(predicciones == "Acierta")
   # aciertos <- as.factor(mini_conjunto[["shot_made_flag"]] == "Acierta")
@@ -535,7 +572,7 @@ calcularMedidasVar(disparos_Test,"shot_zone_basic")
 str(predict(model_ctree, disparos_Test))
 
 
-# Evaluaci髇 en Kaggle
+# Evaluaci贸n en Kaggle
 pred <- predict(model_ctree, disparos_no_supervisados, type="prob")
 exportar <- data.frame(shot_id = disparos_no_supervisados$shot_id, shot_made_flag = pred)
 esportar <- exportar[,c("shot_id","shot_made_flag.Acierta")]
